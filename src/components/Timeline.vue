@@ -2,11 +2,12 @@
 import { ref, computed } from "vue";
 import { DateTime } from "luxon";
 import { TimeLinePost, today, thisWeek, thisMonth } from "../posts";
+import { usePosts } from "../stores/posts";
 import TimelineItem from "./TimelineItem.vue";
 
-// casting an array as a readonly tuple with `as const`
+const postsStore = usePosts();
+
 const periods = ["Today", "This Week", "This Month"] as const;
-// we can derive the type of the array elements using the `typeof` operator
 type Period = (typeof periods)[number];
 
 const selectedPeriod = ref<Period>("Today");
@@ -15,8 +16,6 @@ function selectPeriod(period: Period) {
   console.log(period);
   selectedPeriod.value = period;
 }
-
-// computed properties are reactive and will update when their dependencies change
 
 const posts = computed<TimeLinePost[]>(() => {
   return [today, thisWeek, thisMonth]
@@ -31,13 +30,14 @@ const posts = computed<TimeLinePost[]>(() => {
       if (selectedPeriod.value === "This Week") {
         return post.created >= DateTime.now().minus({ week: 1 });
       }
-     
       return post;
     });
 });
 </script>
 
 <template>
+  {{ postsStore.getState().foo }}
+  <button @click="postsStore.updateFoo('bar')">Update Foo</button>
   <nav class="is-primary panel">
     <span class="panel-tabs">
       <a
@@ -55,6 +55,5 @@ const posts = computed<TimeLinePost[]>(() => {
       :key="post.id" 
       :post="post" 
     />
-
   </nav>
 </template>
